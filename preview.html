@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Modern Access Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body{
+            background:#f5f7fb;
+        }
+
+        .card{
+            @apply bg-white rounded-3xl shadow-sm;
+        }
+    </style>
+</head>
+<body class="p-6 font-sans">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+
+        <div>
+            <h1 class="text-4xl font-bold text-slate-800">
+                Welcome back
+            </h1>
+
+            <p class="text-slate-500 mt-1">
+                Check your last activity today
+            </p>
+        </div>
+
+        <div class="flex items-center gap-4">
+
+            <button class="w-10 h-10 bg-white rounded-full shadow-sm text-xl">
+                🔍
+            </button>
+
+            <button class="w-10 h-10 bg-white rounded-full shadow-sm text-xl">
+                🔔
+            </button>
+
+            <img
+                src="https://i.pravatar.cc/100"
+                class="w-12 h-12 rounded-full object-cover border-4 border-white shadow"
+            >
+
+        </div>
+
+    </div>
+
+    <!-- TOP STATS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+
+        <!-- CARD -->
+        <div class="bg-slate-900 text-white rounded-3xl p-6">
+
+            <div class="flex justify-between items-start">
+
+                <div>
+                    <p class="text-slate-300 text-sm">
+                        Total orders
+                    </p>
+
+                    <h2 class="text-4xl font-bold mt-2">
+                        947
+                    </h2>
+
+                    <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm">
+                        ↗ +5%
+                    </div>
+                </div>
+
+                <div class="w-24">
+                    <canvas id="miniChart1"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CARD -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <div class="flex justify-between items-start">
+
+                <div>
+                    <p class="text-slate-500 text-sm">
+                        Total sales
+                    </p>
+
+                    <h2 class="text-4xl font-bold mt-2 text-slate-800">
+                        $28,407
+                    </h2>
+
+                    <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-600 text-sm">
+                        ↗ +3%
+                    </div>
+                </div>
+
+                <div class="w-24">
+                    <canvas id="miniChart2"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CARD -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <div class="flex justify-between items-start">
+
+                <div>
+                    <p class="text-slate-500 text-sm">
+                        Online sessions
+                    </p>
+
+                    <h2 class="text-4xl font-bold mt-2 text-slate-800">
+                        54,778
+                    </h2>
+
+                    <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-600 text-sm">
+                        ↗ +2%
+                    </div>
+                </div>
+
+                <div class="w-24">
+                    <canvas id="miniChart3"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CARD -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <div class="flex justify-between items-start">
+
+                <div>
+                    <p class="text-slate-500 text-sm">
+                        Average order
+                    </p>
+
+                    <h2 class="text-4xl font-bold mt-2 text-slate-800">
+                        $89.99
+                    </h2>
+
+                    <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-sm">
+                        ↘ -1%
+                    </div>
+                </div>
+
+                <div class="w-24">
+                    <canvas id="miniChart4"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+
+        <!-- SALES CHART -->
+        <div class="xl:col-span-2 bg-white rounded-3xl p-6 shadow-sm">
+
+            <div class="flex items-center justify-between mb-6">
+
+                <h2 class="text-2xl font-bold text-slate-800">
+                    Total Sales
+                </h2>
+
+                <div class="flex gap-6 text-sm">
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+                        Online sales
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+                        Offline sales
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="h-[350px]">
+                <canvas id="salesChart"></canvas>
+            </div>
+
+        </div>
+
+        <!-- DONUT -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                Sales Distribution
+            </h2>
+
+            <div class="h-[300px] flex items-center justify-center">
+                <canvas id="donutChart"></canvas>
+            </div>
+
+            <div class="mt-6 space-y-3">
+
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+                    <span class="text-slate-600">Online sales</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+                    <span class="text-slate-600">Offline sales</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                    <span class="text-slate-600">Returns</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+        <!-- TABLE -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                Recent Orders
+            </h2>
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full">
+
+                    <thead>
+                        <tr class="text-left text-slate-400 border-b">
+                            <th class="pb-4">Product</th>
+                            <th class="pb-4">Date</th>
+                            <th class="pb-4">Price</th>
+                            <th class="pb-4">Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="text-slate-700">
+
+                        <tr class="border-b">
+                            <td class="py-4">Rust Linen Blazer</td>
+                            <td>Jan 25, 2025</td>
+                            <td>$149.99</td>
+                            <td>
+                                <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm">
+                                    Shipping
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr class="border-b">
+                            <td class="py-4">Crop Tank</td>
+                            <td>Jan 25, 2025</td>
+                            <td>$49.99</td>
+                            <td>
+                                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm">
+                                    Received
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="py-4">Oversized Blazer</td>
+                            <td>Jan 24, 2025</td>
+                            <td>$185.99</td>
+                            <td>
+                                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm">
+                                    Received
+                                </span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <!-- CUSTOMER CHART -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <div class="flex items-center justify-between mb-6">
+
+                <h2 class="text-2xl font-bold text-slate-800">
+                    Customers
+                </h2>
+
+                <div class="flex gap-6 text-sm">
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+                        Loyal customers
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+                        New customers
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="h-[350px]">
+                <canvas id="customerChart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+<script>
+
+    // MINI CHARTS
+
+    function createMiniChart(id, color){
+
+        new Chart(document.getElementById(id), {
+
+            type: 'line',
+
+            data: {
+                labels: ['1','2','3','4','5','6'],
+                datasets: [{
+                    data: [5,8,6,10,8,12],
+                    borderColor: color,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+
+            options: {
+                responsive:true,
+                plugins:{
+                    legend:{
+                        display:false
+                    }
+                },
+                scales:{
+                    x:{
+                        display:false
+                    },
+                    y:{
+                        display:false
+                    }
+                }
+            }
+
+        });
+
+    }
+
+    createMiniChart('miniChart1','#818cf8');
+    createMiniChart('miniChart2','#f97316');
+    createMiniChart('miniChart3','#facc15');
+    createMiniChart('miniChart4','#ef4444');
+
+
+
+    // SALES CHART
+
+    new Chart(document.getElementById('salesChart'), {
+
+        type: 'bar',
+
+        data: {
+
+            labels: [
+                'Jan','Feb','Mar','Apr',
+                'May','Jun','Jul','Aug',
+                'Sep','Oct','Nov','Dec'
+            ],
+
+            datasets: [
+
+                {
+                    label:'Online',
+                    data:[22,19,26,23,21,25,23,17,20,19,25,26],
+                    backgroundColor:'#6366f1',
+                    borderRadius:20,
+                    barThickness:14
+                },
+
+                {
+                    label:'Offline',
+                    data:[7,5,8,8,9,6,5,4,5,6,8,3],
+                    backgroundColor:'#fb923c',
+                    borderRadius:20,
+                    barThickness:14
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            maintainAspectRatio:false,
+
+            plugins:{
+                legend:{
+                    display:false
+                }
+            },
+
+            scales:{
+
+                x:{
+                    grid:{
+                        display:false
+                    }
+                },
+
+                y:{
+                    beginAtZero:true
+                }
+
+            }
+
+        }
+
+    });
+
+
+
+    // DONUT
+
+    new Chart(document.getElementById('donutChart'), {
+
+        type:'doughnut',
+
+        data:{
+            labels:['Online','Offline','Returns'],
+            datasets:[{
+                data:[55,30,15],
+                backgroundColor:[
+                    '#6366f1',
+                    '#fb923c',
+                    '#facc15'
+                ],
+                borderWidth:0
+            }]
+        },
+
+        options:{
+            cutout:'70%',
+            plugins:{
+                legend:{
+                    display:false
+                }
+            }
+        }
+
+    });
+
+
+
+    // CUSTOMER
+
+    new Chart(document.getElementById('customerChart'), {
+
+        type:'line',
+
+        data:{
+
+            labels:['Jul','Aug','Sep','Oct','Nov','Dec'],
+
+            datasets:[
+
+                {
+                    label:'Loyal',
+                    data:[500,2300,1500,2700,1800,2800],
+                    borderColor:'#6366f1',
+                    backgroundColor:'#6366f1',
+                    tension:0.4,
+                    pointRadius:0
+                },
+
+                {
+                    label:'New',
+                    data:[400,1800,2400,1000,1800,1700],
+                    borderColor:'#fb923c',
+                    backgroundColor:'#fb923c',
+                    tension:0.4,
+                    pointRadius:0
+                }
+
+            ]
+
+        },
+
+        options:{
+
+            maintainAspectRatio:false,
+
+            plugins:{
+                legend:{
+                    display:false
+                }
+            }
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

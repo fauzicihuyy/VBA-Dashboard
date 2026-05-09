@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Modern Access Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body{
+            background:#f5f7fb;
+        }
+
+        .card{
+            @apply bg-white rounded-3xl shadow-sm;
+        }
+    </style>
+</head>
+<body class="p-6 font-sans">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+
+        <div>
+            <h1 id="headerTitle" class="text-4xl font-bold text-slate-800">
+                Welcome back
+            </h1>
+
+            <p id="headerSubtitle" class="text-slate-500 mt-1">
+                Check your last activity today
+            </p>
+        </div>
+
+        <div class="flex items-center gap-4">
+
+            <button class="w-10 h-10 bg-white rounded-full shadow-sm text-xl">
+                🔍
+            </button>
+
+            <button class="w-10 h-10 bg-white rounded-full shadow-sm text-xl">
+                🔔
+            </button>
+
+            <img
+                src="https://i.pravatar.cc/100"
+                class="w-12 h-12 rounded-full object-cover border-4 border-white shadow"
+            >
+
+        </div>
+
+    </div>
+
+    <!-- TOP STATS -->
+    <div id="statsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+        <!-- Stats will be dynamically generated -->
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+
+        <!-- SALES CHART -->
+        <div class="xl:col-span-2 bg-white rounded-3xl p-6 shadow-sm">
+
+            <div class="flex items-center justify-between mb-6">
+
+                <h2 class="text-2xl font-bold text-slate-800">
+                    Total Sales
+                </h2>
+
+                <div class="flex gap-6 text-sm">
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+                        Online sales
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+                        Offline sales
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="h-[350px]">
+                <canvas id="salesChart"></canvas>
+            </div>
+
+        </div>
+
+        <!-- DONUT -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                Sales Distribution
+            </h2>
+
+            <div class="h-[300px] flex items-center justify-center">
+                <canvas id="donutChart"></canvas>
+            </div>
+
+            <div id="donutLegend" class="mt-6 space-y-3">
+                <!-- Legend will be dynamically generated -->
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+        <!-- TABLE -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                Recent Orders
+            </h2>
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full">
+
+                    <thead>
+                        <tr class="text-left text-slate-400 border-b">
+                            <th class="pb-4">Product</th>
+                            <th class="pb-4">Date</th>
+                            <th class="pb-4">Price</th>
+                            <th class="pb-4">Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="ordersTableBody" class="text-slate-700">
+                        <!-- Orders will be dynamically generated -->
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <!-- CUSTOMER CHART -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm">
+
+            <div class="flex items-center justify-between mb-6">
+
+                <h2 class="text-2xl font-bold text-slate-800">
+                    Customers
+                </h2>
+
+                <div class="flex gap-6 text-sm">
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+                        Loyal customers
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+                        New customers
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="h-[350px]">
+                <canvas id="customerChart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+<script>
+
+async function loadDashboard(){
+
+    // LOAD JSON
+    const response = await fetch('./dashboard.json');
+
+    const data = await response.json();
+
+    // HEADER
+    document.getElementById('headerTitle').innerHTML = data.header.title;
+    document.getElementById('headerSubtitle').innerHTML = data.header.subtitle;
+
+    // STATS
+    const statsContainer = document.getElementById('statsContainer');
+    statsContainer.innerHTML = '';
+
+    data.stats.forEach((stat, index) => {
+        const bgColor = stat.color_theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white';
+        const textColor = stat.color_theme === 'dark' ? 'text-slate-300' : 'text-slate-500';
+        const valueColor = stat.color_theme === 'dark' ? '' : 'text-slate-800';
+        const trendBg = stat.trend_up 
+            ? (stat.color_theme === 'dark' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-600')
+            : 'bg-red-100 text-red-600';
+        const trendIcon = stat.trend_up ? '↗' : '↘';
+
+        const statCard = document.createElement('div');
+        statCard.className = `${bgColor} rounded-3xl p-6`;
+        statCard.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="${textColor} text-sm">
+                        ${stat.label}
+                    </p>
+                    <h2 class="text-4xl font-bold mt-2 ${valueColor}">
+                        ${stat.value}
+                    </h2>
+                    <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full ${trendBg} text-sm">
+                        ${trendIcon} ${stat.trend}
+                    </div>
+                </div>
+                <div class="w-24">
+                    <canvas id="miniChart${index}"></canvas>
+                </div>
+            </div>
+        `;
+        statsContainer.appendChild(statCard);
+
+        // Create mini chart
+        createMiniChart(`miniChart${index}`, stat.mini_chart_color, data.mini_chart_labels, stat.mini_chart_data);
+    });
+
+    // SALES CHART
+    new Chart(document.getElementById('salesChart'), {
+        type: 'bar',
+        data: {
+            labels: data.sales_chart.labels,
+            datasets: [
+                {
+                    label: 'Online',
+                    data: data.sales_chart.online,
+                    backgroundColor: '#6366f1',
+                    borderRadius: 20,
+                    barThickness: 14
+                },
+                {
+                    label: 'Offline',
+                    data: data.sales_chart.offline,
+                    backgroundColor: '#fb923c',
+                    borderRadius: 20,
+                    barThickness: 14
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // DONUT CHART
+    new Chart(document.getElementById('donutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: data.donut_chart.labels,
+            datasets: [{
+                data: data.donut_chart.data,
+                backgroundColor: data.donut_chart.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // DONUT LEGEND
+    const donutLegend = document.getElementById('donutLegend');
+    donutLegend.innerHTML = '';
+    data.donut_chart.labels.forEach((label, index) => {
+        const legendItem = document.createElement('div');
+        legendItem.className = 'flex items-center gap-3';
+        legendItem.innerHTML = `
+            <div class="w-3 h-3 rounded-full" style="background-color: ${data.donut_chart.colors[index]}"></div>
+            <span class="text-slate-600">${label}</span>
+        `;
+        donutLegend.appendChild(legendItem);
+    });
+
+    // RECENT ORDERS TABLE
+    const ordersTableBody = document.getElementById('ordersTableBody');
+    ordersTableBody.innerHTML = '';
+    data.recent_orders.forEach(order => {
+        const statusColor = order.status === 'Received' 
+            ? 'bg-emerald-100 text-emerald-700' 
+            : 'bg-yellow-100 text-yellow-700';
+        
+        const row = document.createElement('tr');
+        row.className = 'border-b';
+        row.innerHTML = `
+            <td class="py-4">${order.product}</td>
+            <td>${order.date}</td>
+            <td>${order.price}</td>
+            <td>
+                <span class="px-3 py-1 rounded-full ${statusColor} text-sm">
+                    ${order.status}
+                </span>
+            </td>
+        `;
+        ordersTableBody.appendChild(row);
+    });
+
+    // CUSTOMER CHART
+    new Chart(document.getElementById('customerChart'), {
+        type: 'line',
+        data: {
+            labels: data.customer_chart.labels,
+            datasets: [
+                {
+                    label: 'Loyal',
+                    data: data.customer_chart.loyal,
+                    borderColor: '#6366f1',
+                    backgroundColor: '#6366f1',
+                    tension: 0.4,
+                    pointRadius: 0
+                },
+                {
+                    label: 'New',
+                    data: data.customer_chart.new,
+                    borderColor: '#fb923c',
+                    backgroundColor: '#fb923c',
+                    tension: 0.4,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function createMiniChart(id, color, labels, data) {
+    new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderColor: color,
+                borderWidth: 3,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    display: false
+                },
+                y: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+loadDashboard();
+
+</script>
+
+</body>
+</html>
